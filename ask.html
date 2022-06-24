@@ -1,0 +1,66 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="utf-8">
+    <Title>Ask A Question</Title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <script>
+        function prevent_XSS(str) {
+            return String(str).replace(/[^\w. ]/gi, function (c) { return '&#' + c.charCodeAt(0) + ';'; });
+        }
+        function getLambda() {
+            var xhttp = new XMLHttpRequest();
+            let url = new URL('https://81z09mxa3a.execute-api.us-east-1.amazonaws.com/2/answers')
+            url.searchParams.set('q', prevent_XSS(document.getElementById("q").innerText));
+
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("find_answer_response").innerHTML = JSON.parse(this.response)['body'];
+                }
+            };
+            xhttp.open("GET", url, true);
+            xhttp.send();
+        }
+    </script>
+
+</head>
+
+<body>
+
+
+    <div class="content">
+        <h1>Ask here</h1>
+        <p>Type your question in the textbox below.</p>
+        <form>
+            <textarea name="q_post" id="q_post" cols="80" rows="10" placeholder="Question Body"></textarea>
+            <p />
+            <p />
+            <input type="submit" value="Ask Question" />
+        </form>
+        {% if error %}
+        <p class="error">{{error}}</p>
+        {% endif %}
+        <h1><span>Server Response: </span></h1>
+        <h2><span id="question_submit_response">None</span></h2>
+    </div>
+    <div class="content">
+        <h1>Find Answer here</h1>
+        <p>Type your question in the textbox below.</p>
+        <form onsubmit="getLambda(event); false">
+            <textarea name="q" id="q" cols="80" rows="10" placeholder="Question Body" id="answer_body"></textarea>
+            <p />
+        </form>
+        <button onclick="getLambda()">Find Answers</button>
+        {% if error %}
+        <p class="error">{{error}}</p>
+        {% endif %}
+        <h1><span>Server Response: </span></h1>
+        <h2><span id="find_answer_response">None</span></h2>
+    </div>
+
+
+</body>
+
+</html>
